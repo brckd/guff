@@ -2,10 +2,11 @@
   "name": "guff",
   "version": "0.1.0",
   "description": "A super awesome Discord bot for Guffo's server",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "start": "npm dist/index.js",
+    "start": "node .",
     "build": "npx tsc",
+    "watch": "npx tsc -w",
     "dev": "npx nodemon src/index.ts",
     "format": "npx prettier --write src/"
   },
@@ -35,6 +36,9 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "discord.js": "^14.4.0",
-    "dotenv": "^16.0.2"
-  }
+    "dotenv": "^16.0.2",
+    "hmues.js": "~0.1.0"
+  },
+  "prettier": "./node_modules/hmues.js/.prettierrc.json",
+  "eslintConfig": { "extends": "./node_modules/hmues.js/.eslintrc.json" }
 }
