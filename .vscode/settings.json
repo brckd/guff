@@ -1,0 +1,8 @@
+{
+  "eslint.rules.customizations": [
+    { "rule": "*", "severity": "warn" }
+  ],
+  "eslint.validate": ["typescript"],
+  "editor.tabSize": 2,
+  "files.eol": "\n"
+}
