@@ -37,7 +37,7 @@
     "chalk": "^4.1.2",
     "discord.js": "^14.4.0",
     "dotenv": "^16.0.2",
-    "hmues.js": "~0.1.0"
+    "hmues.js": "github:brycked/hmues.js"
   },
   "prettier": "./node_modules/hmues.js/.prettierrc.json",
   "eslintConfig": { "extends": "./node_modules/hmues.js/.eslintrc.json" }
