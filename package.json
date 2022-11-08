@@ -1,44 +1,48 @@
 {
   "name": "guff",
-  "version": "0.1.0",
-  "description": "A super awesome Discord bot for Guffo's server",
-  "main": "./dist/index.js",
-  "scripts": {
-    "start": "node .",
-    "build": "npx tsc",
-    "watch": "npx tsc -w",
-    "dev": "npx nodemon src/index.ts",
-    "format": "npx prettier --write src/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/brycked/guff.git"
-  },
+  "version": "2.0.0",
+  "description": "A really cook Discord Bot for Guffo's server",
+  "main": "lib/run.ts",
   "keywords": [
     "discord",
     "bot",
-    "typescript"
+    "typescript",
+    "ts"
   ],
   "author": "Bricked",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/brycked/guff/issues"
-  },
-  "homepage": "https://github.com/brycked/guff#readme",
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "eslint": "^8.24.0",
-    "eslint-config-standard-with-typescript": "^23.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.3.0",
-    "eslint-plugin-promise": "^6.0.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brycked/guff"
   },
   "dependencies": {
+    "canvas": "^2.9.3",
     "chalk": "^4.1.2",
-    "discord.js": "^14.4.0",
-    "dotenv": "^16.0.2",
-    "hmues.js": "github:brycked/hmues.js#db1c26f79d349bb26b9e68367b455c2995f89462"
+    "common-tags": "^1.8.2",
+    "dayjs": "^1.11.5",
+    "discord.js": "^14.6.0",
+    "dotenv": "^16.0.0",
+    "mongoose": "^6.6.1",
+    "ms": "^3.0.0-beta.2"
   },
-  "prettier": "./node_modules/hmues.js/.prettierrc.json",
-  "eslintConfig": { "extends": "./node_modules/hmues.js/.eslintrc.json" }
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc -w",
+    "format": "npx eslint --fix & npx prettier --write ./**/*.ts",
+    "start": "node .",
+    "dev": "nodemon src/run.ts"
+  },
+  "devDependencies": {
+    "@types/common-tags": "^1.8.1",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  }
 }

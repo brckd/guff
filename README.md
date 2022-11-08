@@ -1,11 +1,10 @@
 <div align="center">
 
-# Guff
+<img src="./img/title.svg" alt="HMUES" width="400"><br>
+<img src="./img/bar.svg" width="400"><br>
+<img src="./img/desc.svg" alt="Create and store pieces real quic" width="400">
 
-**A super awesome Discord bot for Guffo's server**
-
-[![Guffo's Server](https://discord.com/api/guilds/840977388385075210/embed.png?style=banner2)](https://discord.gg/KubGRbRKWX)
+[![discord](https://img.shields.io/discord/840977388385075210?label=chat&color=5865F2&logo=discord&logoColor=white)](https://discord.gg/KubGRbRKWX)
+[![license](https://img.shields.io/github/license/hmues/pieces?logo=github)](https://github.com/brycked/guff/blob/main/LICENSE.md)
 
 </div>
-
----
