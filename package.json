@@ -2,7 +2,7 @@
   "name": "guff",
   "version": "2.0.0",
   "description": "A really cook Discord Bot for Guffo's server",
-  "main": "lib/run.ts",
+  "main": "src/run.ts",
   "keywords": [
     "discord",
     "bot",
@@ -28,7 +28,7 @@
     "build": "npx tsc",
     "watch": "npx tsc -w",
     "format": "npx eslint --fix & npx prettier --write ./**/*.ts",
-    "start": "node .",
+    "start": "node src/run.ts",
     "dev": "nodemon src/run.ts"
   },
   "devDependencies": {
