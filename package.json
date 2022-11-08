@@ -28,7 +28,7 @@
     "build": "npx tsc",
     "watch": "npx tsc -w",
     "format": "npx eslint --fix & npx prettier --write ./**/*.ts",
-    "start": "node src/run.ts",
+    "start": "node src/run.js",
     "dev": "nodemon src/run.ts"
   },
   "devDependencies": {
