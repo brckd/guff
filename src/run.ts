@@ -17,7 +17,7 @@ const client = new HydroClient({
   owners: ['691572882148425809'],
   color: Colors.Purple,
   inviteURL:
-    'https://discord.com/api/oauth2/authorize?client_id=986707906999251014&permissions=76800&scope=bot%20applications.commands'
+    'https://discord.com/api/oauth2/authorize?client_id=1012759255641751613&permissions=8192&scope=bot%20applications.commands'
 })
 
 void client.login(process.env.TOKEN)
