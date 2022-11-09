@@ -40,10 +40,6 @@ export default class UpdatePresence extends Listener {
     (c) => ({
       type: ActivityType.Listening,
       name: `${ms(c.ws.ping)} heartbeat`
-    }),
-    {
-      type: ActivityType.Listening,
-      name: '/Info'
-    }
+    })
   ]
 }
