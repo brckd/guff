@@ -1,6 +1,7 @@
 import { Listener } from '../../core'
-import { ClientEvents, EmbedBuilder, Message } from 'discord.js'
+import { ClientEvents, EmbedBuilder, Message, TextChannel } from 'discord.js'
 import Xp from '../../schemata/Xp'
+import Guild from '../../schemata/Guild'
 
 export function toLvl(xp: number) {
   return Math.floor(xp ** 0.5)
@@ -19,7 +20,12 @@ export async function levelUp(inter: Message, before: number, after: number) {
     })
     .setColor(inter.client.color)
 
-  await inter.channel.send({
+  const channelId = (await Guild.findOne({ id: inter.guildId }))?.levelupChannel
+  const fetched = channelId ? await inter.client.channels.fetch(channelId) : null
+  if (channelId) await inter.client.channels.fetch(channelId)
+  const channel = fetched instanceof TextChannel ? fetched : inter.channel
+
+  await channel.send({
     embeds: [embed]
   })
 }

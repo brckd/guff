@@ -1,7 +1,8 @@
 import { Listener } from '../../../core'
 import { createCanvas, Image, loadImage } from 'canvas'
-import { AttachmentBuilder, ClientEvents, EmbedBuilder, GuildMember } from 'discord.js'
+import { AttachmentBuilder, ClientEvents, EmbedBuilder, GuildMember, TextChannel } from 'discord.js'
 import { join, resolve } from 'path'
+import Guild from '../../../schemata/Guild'
 
 function createImage({ back, avatar, caption }: { back: Image; avatar: Image; caption: string }) {
   const size = (back.width + back.height) / 2
@@ -58,7 +59,12 @@ export class Welcome extends Listener {
       .setColor(member.client.color)
       .setImage('attachment://image.png')
 
-    const sent = await member.guild.systemChannel.send({
+    const channelId = (await Guild.findOne({ id: member.guild.id }))?.welcomeChannel
+    const fetched = channelId ? await member.client.channels.fetch(channelId) : null
+    if (channelId) await member.client.channels.fetch(channelId)
+    const channel = fetched instanceof TextChannel ? fetched : member.guild.systemChannel
+
+    const sent = await channel.send({
       embeds: [embed],
       files: [attachment]
     })
@@ -83,7 +89,12 @@ export class GoodBye extends Listener {
       .setColor(member.client.color)
       .setImage('attachment://image.png')
 
-    const sent = await member.guild.systemChannel.send({
+    const channelId = (await Guild.findOne({ id: member.guild.id }))?.welcomeChannel
+    const fetched = channelId ? await member.client.channels.fetch(channelId) : null
+    if (channelId) await member.client.channels.fetch(channelId)
+    const channel = fetched instanceof TextChannel ? fetched : member.guild.systemChannel
+
+    const sent = await channel.send({
       embeds: [embed],
       files: [attachment]
     })
