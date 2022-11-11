@@ -63,9 +63,8 @@ export class Set extends ChatInputCommand {
         {
           type: ApplicationCommandOptionType.Channel,
           name: 'channel',
-          description: 'The Channel to set it to',
-          channelTypes: [ChannelType.GuildText],
-          required: true
+          description: 'The Channel to set it to. Omit to reset.',
+          channelTypes: [ChannelType.GuildText]
         }
       ]
     })
@@ -84,7 +83,7 @@ export class Set extends ChatInputCommand {
       await this.setChannel(
         inter,
         inter.options.getString('event', true) as 'levelup' | 'welcome',
-        inter.options.getChannel('channel', true)
+        inter.options.getChannel('channel')
       )
   }
 
@@ -114,19 +113,21 @@ export class Set extends ChatInputCommand {
   async setChannel(
     inter: ChatInputCommandInteraction,
     event: 'levelup' | 'welcome',
-    channel: APIInteractionDataResolvedChannel | GuildBasedChannel
+    channel: APIInteractionDataResolvedChannel | GuildBasedChannel | null
   ) {
     await Guild.findOneAndUpdate(
       { id: inter.guildId },
-      { $set: { [`${event}Channel`]: channel.id } },
+      { [channel ? '$set' : '$unset']: { [`${event}Channel`]: channel?.id ?? '' } },
       { upsert: true }
     )
 
     const embed = new EmbedBuilder()
       .setDescription(
-        `✅ Set **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel to <#${
-          channel.id
-        }>`
+        channel
+          ? `✅ Set **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel to <#${
+              channel?.id
+            }>`
+          : `✅ Reset **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel`
       )
       .setColor(Colors.Green)
 
