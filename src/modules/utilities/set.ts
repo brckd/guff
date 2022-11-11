@@ -2,6 +2,7 @@ import { ChatInputCommand } from '../../core'
 import {
   APIInteractionDataResolvedChannel,
   ApplicationCommandOptionType,
+  ChannelType,
   ChatInputCommandInteraction,
   Colors,
   EmbedBuilder,
@@ -63,6 +64,7 @@ export class Set extends ChatInputCommand {
           type: ApplicationCommandOptionType.Channel,
           name: 'channel',
           description: 'The Channel to set it to',
+          channelTypes: [ChannelType.GuildText],
           required: true
         }
       ]
