@@ -61,8 +61,9 @@ export class Set extends ChatInputCommand {
         },
         {
           type: ApplicationCommandOptionType.Channel,
-          name: 'Channel',
-          description: 'The Channel to set it to'
+          name: 'channel',
+          description: 'The Channel to set it to',
+          required: true
         }
       ]
     })
