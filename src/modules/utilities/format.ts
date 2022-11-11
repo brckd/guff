@@ -65,7 +65,7 @@ export class Format extends ChatInputCommand {
         new EmbedBuilder()
           .setTitle(this.name.replace(/\b\w/g, (c) => c.toUpperCase()))
           .setDescription('Message has been formatted!')
-          .setColor(inter.client.color)
+          .setColor(Colors.Green)
       ],
       ephemeral: true
     })
