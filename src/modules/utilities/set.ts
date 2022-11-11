@@ -73,9 +73,13 @@ export class Set extends ChatInputCommand {
 
   override async run(inter: ChatInputCommandInteraction) {
     const stat = inter.options.getSubcommand()
-    const value = inter.options.getInteger('value', true)
     if (stat === 'wallet' || stat === 'bank' || stat === 'xp')
-      await this.setStat(inter, stat, inter.options.getUser('target', true), value)
+      await this.setStat(
+        inter,
+        stat,
+        inter.options.getUser('target', true),
+        inter.options.getInteger('value', true)
+      )
     else if (stat === 'channel')
       await this.setChannel(
         inter,
@@ -120,7 +124,9 @@ export class Set extends ChatInputCommand {
 
     const embed = new EmbedBuilder()
       .setDescription(
-        `✅ Set ${{ levelup: 'Level-UP', welcome: 'Welcome' }[event]}-channel to <#${channel.id}>`
+        `✅ Set **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel to <#${
+          channel.id
+        }>`
       )
       .setColor(Colors.Green)
 
