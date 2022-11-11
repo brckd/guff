@@ -219,7 +219,7 @@ export class AddItem extends Modal {
 
     const embed = new EmbedBuilder()
       .setTitle('Add Item')
-      .setDescription(`✅ **${name}** has been added for 🪙${price}`)
+      .setDescription(`**${name}** has been added for 🪙${price}`)
       .setColor(Colors.Green)
 
     await inter.reply({
@@ -242,7 +242,7 @@ export class RmItem extends Modal {
 
     const embed = new EmbedBuilder()
       .setTitle('Add Item')
-      .setDescription(`✅ **${item?.name}** has been removed from the shop`)
+      .setDescription(`**${item?.name}** has been removed from the shop`)
       .setColor(Colors.Green)
 
     await inter.reply({

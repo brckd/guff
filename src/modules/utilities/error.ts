@@ -21,7 +21,7 @@ export class CommandError extends Listener<string> {
   override async run(inter: CommandInteraction, error: Error) {
     const embed = new EmbedBuilder()
       .setTitle(error.name)
-      .setDescription(`❌ ${error.message}`)
+      .setDescription(`${error.message}`)
       .setColor(Colors.Red)
 
     const components: Array<ActionRowBuilder<ButtonBuilder>> = []
@@ -55,7 +55,7 @@ export class ComponentError extends Listener<string> {
   override async run(inter: MessageComponentInteraction | ModalSubmitInteraction, error: Error) {
     const embed = new EmbedBuilder()
       .setTitle(error.name)
-      .setDescription(`❌ ${error.message}`)
+      .setDescription(`${error.message}`)
       .setColor(Colors.Red)
 
     const components: Array<ActionRowBuilder<ButtonBuilder>> = []

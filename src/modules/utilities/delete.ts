@@ -32,7 +32,7 @@ export class Delete extends MessageContextMenuCommand {
     await inter.reply({
       embeds: [
         new EmbedBuilder()
-          .setDescription('✅ Message has successfully been deleted')
+          .setDescription('Message has successfully been deleted')
           .setColor(Colors.Green)
       ],
       ephemeral: true

@@ -101,7 +101,7 @@ export class Set extends ChatInputCommand {
     )
 
     const embed = new EmbedBuilder()
-      .setDescription(`✅ Set ${target}'s ${stat} to **${value}**`)
+      .setDescription(`Set ${target}'s ${stat} to **${value}**`)
       .setColor(Colors.Green)
 
     await inter.reply({
@@ -124,10 +124,10 @@ export class Set extends ChatInputCommand {
     const embed = new EmbedBuilder()
       .setDescription(
         channel
-          ? `✅ Set **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel to <#${
+          ? `Set **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel to <#${
               channel?.id
             }>`
-          : `✅ Reset **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel`
+          : `Reset **${{ levelup: 'Level-UPs', welcome: 'Welcome' }[event]}** channel`
       )
       .setColor(Colors.Green)
 

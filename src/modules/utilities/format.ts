@@ -135,7 +135,7 @@ export class ReplyModal extends Modal {
 
     const embed = new EmbedBuilder()
       .setTitle('Reply')
-      .setDescription('✅ Reply has been sent')
+      .setDescription('Reply has been sent')
       .setColor(Colors.Green)
 
     await inter.reply({

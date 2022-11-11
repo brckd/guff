@@ -123,7 +123,7 @@ export class SetRoles extends SelectMenu {
 
     const embed = new EmbedBuilder()
       .setDescription(
-        stripIndents`✅ Added roles: ${await Promise.all(
+        stripIndents`Added roles: ${await Promise.all(
           inter.values.map((v) => `\n> ${inter.guild?.roles.cache.get(v)}`)
         )}`
       )
