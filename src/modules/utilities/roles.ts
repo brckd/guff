@@ -62,7 +62,7 @@ class Roles extends MessageContextMenuCommand {
           (inter.member as GuildMember).roles.highest.position > r.position &&
           (inter.guild?.members.me?.roles.highest.position ?? 0) > r.position
       )
-      .sort((a, b) => a.position - b.position)
+      .sort((a, b) => b.position - a.position)
 
     if (!roles) throw new DiscordException('No roles to ')
     i = Math.min(Math.max(i, 0), Math.floor(roles.size / 25))
