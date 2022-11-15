@@ -43,7 +43,7 @@ export class LotteryCommand extends ChatInputCommand {
     const row = new ActionRowBuilder<ButtonBuilder>().setComponents(submit, startLottery)
 
     await inter.reply({
-      content: '<@&1002177367537635339>',
+      content: '<@&1008402847622242416>',
       embeds: [embed],
       components: [row]
     })
