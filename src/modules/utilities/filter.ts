@@ -101,7 +101,7 @@ export class FilterMessages extends Listener {
     if (filter.images)
       if (
         msg.attachments.some((a) => a.contentType?.startsWith('image')) ||
-        msg.embeds.some((e) => e.image ?? e.thumbnail)
+        msg.embeds.some((e) => e.image)
       )
         return
 
