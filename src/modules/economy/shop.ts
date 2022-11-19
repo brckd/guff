@@ -222,30 +222,39 @@ export class AddItem extends Modal {
       .setDescription(`**${name}** has been added for 🪙${price}`)
       .setColor(Colors.Green)
 
-    await inter.reply({
-      embeds: [embed],
-      ephemeral: true
-    })
+    if (!inter.isFromMessage()) {
+      await inter.reply({
+        embeds: [embed],
+        ephemeral: true
+      })
+    } else {
+      await inter.update(await Shop.prototype.response(inter))
+      await inter.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+    }
   }
 }
 
-export class RmItem extends Modal {
+export class RmItem extends Button {
   name = 'rmItem'
 
-  override async run(inter: ModalSubmitInteraction, v: string) {
+  override async run(inter: ButtonInteraction, v: string) {
     if (!inter.memberPermissions?.has('Administrator'))
       throw new MissingPermissions('Administrator')
 
     const item = await Item.findByIdAndDelete(v)
 
     if (!item) throw new DiscordException(`Item not found: ${v}`)
+    await inter.update(await Shop.prototype.response(inter))
 
     const embed = new EmbedBuilder()
       .setTitle('Add Item')
       .setDescription(`**${item?.name}** has been removed from the shop`)
       .setColor(Colors.Green)
 
-    await inter.reply({
+    await inter.followUp({
       embeds: [embed],
       ephemeral: true
     })
