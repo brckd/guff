@@ -3,6 +3,9 @@ import {
   ActionRowBuilder,
   ChatInputCommandInteraction,
   ClientEvents,
+  Colors,
+  EmbedBuilder,
+  inlineCode,
   Message,
   MessageType,
   SelectMenuBuilder,
@@ -10,6 +13,7 @@ import {
   SelectMenuOptionBuilder
 } from 'discord.js'
 import Filter from '../../schemata/Filter'
+import { oneLineCommaListsOr } from 'common-tags'
 
 class FilterCommand extends ChatInputCommand {
   name = 'filter'
@@ -111,5 +115,16 @@ export class FilterMessages extends Listener {
     if (filter.audio) if (msg.attachments.some((a) => a.contentType?.startsWith('audio'))) return
 
     await msg.delete()
+
+    const media = filterCommand.media.filter((m) => filter[m.id]).map((m) => inlineCode(m.id))
+    const embed = new EmbedBuilder()
+      .setDescription(
+        oneLineCommaListsOr`Your message in <#${msg.channelId}> has been deleted, because it doesn't contain any ${media}.`
+      )
+      .setColor(Colors.Red)
+
+    await msg.author.send({
+      embeds: [embed]
+    })
   }
 }
