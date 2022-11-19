@@ -4,6 +4,7 @@ import {
   ChatInputCommandInteraction,
   ClientEvents,
   Message,
+  MessageType,
   SelectMenuBuilder,
   SelectMenuInteraction,
   SelectMenuOptionBuilder
@@ -83,6 +84,7 @@ export class FilterMessages extends Listener {
 
   override async run(msg: Message) {
     if (!msg.deletable) return
+    if (![MessageType.Default, MessageType.Reply].includes(msg.type)) return
     if (!(await Filter.exists({ channelId: msg.channelId }))) return
     await this.checkMedia(msg)
   }
