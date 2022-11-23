@@ -2,6 +2,7 @@ import { Listener } from '../../core'
 import { ClientEvents, EmbedBuilder, Message, TextChannel } from 'discord.js'
 import Xp from '../../schemata/Xp'
 import Guild from '../../schemata/Guild'
+import Filter from '../../schemata/Filter'
 
 export function toLvl(xp: number) {
   return Math.floor(xp ** 0.5)
@@ -37,6 +38,8 @@ export class XP extends Listener {
   override async run(msg: Message) {
     if (!msg.inGuild()) return
     if (msg.author.bot) return
+    if ((await Filter.findOne({ channelId: msg.channelId }, { levelups: 1 }))?.levelUps === false)
+      return
 
     const xp = await Xp.findOneAndUpdate(
       { guildId: msg.guildId, userId: msg.author.id },

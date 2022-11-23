@@ -1,12 +1,16 @@
-import { ChatInputCommand, Listener, SelectMenu } from '../../core'
+import { Button, ChatInputCommand, Listener, SelectMenu } from '../../core'
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
   ChatInputCommandInteraction,
   ClientEvents,
   Colors,
   EmbedBuilder,
   inlineCode,
   Message,
+  MessageComponentInteraction,
   MessageType,
   SelectMenuBuilder,
   SelectMenuInteraction,
@@ -31,7 +35,7 @@ class FilterCommand extends ChatInputCommand {
     { id: 'audio', emoji: '🔊' }
   ] as const
 
-  override async run(inter: ChatInputCommandInteraction | SelectMenuInteraction) {
+  override async run(inter: ChatInputCommandInteraction | MessageComponentInteraction) {
     const filter = await Filter.findOneAndUpdate(
       { channelId: inter.channelId },
       {},
@@ -52,21 +56,41 @@ class FilterCommand extends ChatInputCommand {
             .setDefault(filter[m.id] ?? false)
         )
       )
-    const media = new ActionRowBuilder<SelectMenuBuilder>().setComponents(mediaFilter)
+    const levelUpsFilter = new ButtonBuilder()
+      .setCustomId(`levelUpsFilter-${filter.id}`)
+      .setLabel(filter.levelUps ? 'Disable Level-UPs' : 'Enable Level-UPs')
+      .setEmoji('✨')
+      .setStyle(filter.levelUps ? ButtonStyle.Danger : ButtonStyle.Success)
+
+    const components = [
+      new ActionRowBuilder<SelectMenuBuilder>().setComponents(mediaFilter),
+      new ActionRowBuilder<ButtonBuilder>().setComponents(levelUpsFilter)
+    ]
 
     if (inter.isMessageComponent())
       await inter.update({
-        components: [media]
+        components
       })
     else
       await inter.reply({
-        components: [media],
+        components,
         ephemeral: true
       })
   }
 }
 
 export const filterCommand = new FilterCommand()
+
+export class LevelUpsFilter extends Button {
+  name = 'levelUpsFilter'
+
+  override async run(inter: ButtonInteraction, id: string) {
+    const filter = await Filter.findByIdAndUpdate(id, {}, { upsert: true, new: true })
+    filter.levelUps = !filter.levelUps
+    await filter.save()
+    await filterCommand.run(inter)
+  }
+}
 
 export class MediaFilters extends SelectMenu {
   name = 'mediaFilters'
