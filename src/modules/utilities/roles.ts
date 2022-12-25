@@ -1,11 +1,13 @@
-import { DiscordException, MessageContextMenuCommand, SelectMenu } from '../../core'
+import { Button, DiscordException, MessageContextMenuCommand, SelectMenu } from '../../core'
 import { stripIndents } from 'common-tags'
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
   Colors,
   EmbedBuilder,
   GuildMember,
-  Message,
   MessageContextMenuCommandInteraction,
   PermissionsBitField,
   SelectMenuBuilder,
@@ -39,7 +41,7 @@ function colorEmoji(color: number) {
   return emoji
 }
 
-export class Roles extends MessageContextMenuCommand {
+class Roles extends MessageContextMenuCommand {
   name = 'Roles'
   constructor() {
     super()
@@ -48,39 +50,72 @@ export class Roles extends MessageContextMenuCommand {
     this.preconditions = ['GuildOnly', 'ClientPermissions']
   }
 
-  override async run(inter: MessageContextMenuCommandInteraction, message: Message) {
-    const roles = inter.guild?.roles.cache.filter(
-      (r) =>
-        r.position > 0 &&
-        (inter.member as GuildMember).roles.highest.position > r.position &&
-        (inter.guild?.members.me?.roles.highest.position ?? 0) > r.position
-    )
+  override async run(
+    inter: MessageContextMenuCommandInteraction | ButtonInteraction,
+    message: { id: string },
+    i = 0
+  ) {
+    const roles = inter.guild?.roles.cache
+      .filter(
+        (r) =>
+          r.position > 0 &&
+          (inter.member as GuildMember).roles.highest.position > r.position &&
+          (inter.guild?.members.me?.roles.highest.position ?? 0) > r.position
+      )
+      .sort((a, b) => b.position - a.position)
 
     if (!roles) throw new DiscordException('No roles to ')
-    const row = new ActionRowBuilder<SelectMenuBuilder>().setComponents(
+    i = Math.min(Math.max(i, 0), Math.floor(roles.size / 25))
+    const menu = new ActionRowBuilder<SelectMenuBuilder>().setComponents(
       new SelectMenuBuilder()
-        .setCustomId(`setroles-${message.id}`)
+        .setCustomId(`setRoles-${message.id}`)
         .setPlaceholder('Set roles')
         .setOptions(
-          roles.map((r) =>
-            new SelectMenuOptionBuilder()
-              .setLabel(r.name)
-              .setValue(r.id)
-              .setEmoji(colorEmoji(r.color))
-          )
+          roles
+            .map((r) =>
+              new SelectMenuOptionBuilder()
+                .setLabel(r.name)
+                .setValue(r.id)
+                .setEmoji(colorEmoji(r.color))
+            )
+            .slice(25 * i, 25 * i + 25)
         )
-        .setMaxValues(roles.size)
+        .setMaxValues(Math.min(roles.size - 25 * i, 25))
+    )
+    const paginator = new ActionRowBuilder<ButtonBuilder>().setComponents(
+      new ButtonBuilder()
+        .setStyle(ButtonStyle.Secondary)
+        .setCustomId(`toRoles-${message.id}-${i}-prev`)
+        .setEmoji('◀️')
+        .setDisabled(i <= 0),
+      new ButtonBuilder()
+        .setStyle(ButtonStyle.Secondary)
+        .setCustomId(`toRoles-${message.id}-${i}-next`)
+        .setEmoji('▶️')
+        .setDisabled(i >= Math.floor(roles.size / 25))
     )
 
-    await inter.reply({
-      components: [row],
-      ephemeral: true
-    })
+    if (inter.isMessageComponent()) await inter.update({ components: [menu, paginator] })
+    else
+      await inter.reply({
+        components: [menu, paginator],
+        ephemeral: true
+      })
+  }
+}
+
+export const roles = new Roles()
+
+export class toRoles extends Button {
+  name: string = 'toRoles'
+
+  override async run(inter: ButtonInteraction, messageId: string, i: string, to: 'prev' | 'next') {
+    await roles.run(inter, { id: messageId }, to === 'prev' ? parseInt(i) - 1 : parseInt(i) + 1)
   }
 }
 
 export class SetRoles extends SelectMenu {
-  name: string = 'setroles'
+  name: string = 'setRoles'
 
   override async run(inter: SelectMenuInteraction, messageId: string) {
     const message = await inter.channel?.messages.fetch(messageId)

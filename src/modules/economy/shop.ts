@@ -21,7 +21,8 @@ import {
   ButtonBuilder,
   ButtonStyle,
   Interaction,
-  ButtonInteraction
+  ButtonInteraction,
+  MessageComponentInteraction
 } from 'discord.js'
 import mongoose from 'mongoose'
 import { Inv } from '../../schemata/Inventory'
@@ -79,17 +80,21 @@ export class ShopMenu extends SelectMenu {
     }
 
     const v = inter.values[0]
-    if (v === 'add') return await this.add(inter)
+    if (v === 'add') return await this.set(inter)
     else return await this.buy(inter, v)
   }
 
-  async add(inter: SelectMenuInteraction) {
+  async set(inter: MessageComponentInteraction, edit?: string) {
+    if (!inter.memberPermissions?.has('Administrator'))
+      throw new MissingPermissions('Administrator')
+
     const name = new TextInputBuilder()
       .setCustomId('name')
       .setLabel('Name')
       .setPlaceholder(`The name of this item`)
       .setStyle(TextInputStyle.Short)
       .setMinLength(1)
+      .setRequired(!edit)
 
     const price = new TextInputBuilder()
       .setCustomId('price')
@@ -98,6 +103,7 @@ export class ShopMenu extends SelectMenu {
       .setStyle(TextInputStyle.Short)
       .setMinLength(1)
       .setMaxLength(10)
+      .setRequired(!edit)
 
     const desc = new TextInputBuilder()
       .setCustomId('desc')
@@ -105,10 +111,11 @@ export class ShopMenu extends SelectMenu {
       .setPlaceholder(`The description of this item`)
       .setStyle(TextInputStyle.Paragraph)
       .setMinLength(1)
+      .setRequired(!edit)
 
     const modal = new ModalBuilder()
       .setTitle('Add Item')
-      .setCustomId('addItem')
+      .setCustomId(edit ? `setItem-${edit}` : 'setItem')
       .setComponents(
         new ActionRowBuilder<TextInputBuilder>().setComponents(name),
         new ActionRowBuilder<TextInputBuilder>().setComponents(price),
@@ -128,7 +135,7 @@ export class ShopMenu extends SelectMenu {
       .setColor(inter.client.color)
 
     const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
-      new ButtonBuilder().setCustomId('toShop').setEmoji('↩️').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('toShop').setEmoji('↩️').setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(`buyItem-${v}`)
         .setLabel(`${item.price}`)
@@ -138,7 +145,14 @@ export class ShopMenu extends SelectMenu {
 
     if (inter.memberPermissions?.has('Administrator'))
       row.addComponents(
-        new ButtonBuilder().setCustomId(`rmItem-${v}`).setEmoji('🗑️').setStyle(ButtonStyle.Danger)
+        new ButtonBuilder()
+          .setCustomId(`updItem-${v}`)
+          .setEmoji('⚙️')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder() //
+          .setCustomId(`rmItem-${v}`)
+          .setEmoji('🗑️')
+          .setStyle(ButtonStyle.Danger)
       )
     await inter.update({ embeds: [embed], components: [row] })
   }
@@ -186,66 +200,84 @@ export class BuyItem extends Button {
   }
 }
 
-const emojiRegExp = /^(\p{Emoji}|<?a?:?\w{2,32}:\d{17,19}>?)\s*/u
+const emojiRegExp = /^((?!\d)\p{Emoji}|<?a?:?\w{2,32}:\d{17,19}>?)\s*/u
 
-export class AddItem extends Modal {
-  name = 'addItem'
+export class SetItem extends Modal {
+  name = 'setItem'
 
-  override async run(inter: ModalSubmitInteraction) {
-    if (!inter.memberPermissions?.has('Administrator'))
-      throw new MissingPermissions('Administrator')
-
-    const price = inter.fields.getTextInputValue('price')
-    if (Number.isNaN(parseInt(price)))
-      throw new DiscordException(`Couldn't convert \`${price}\` to number`)
+  override async run(inter: ModalSubmitInteraction, v?: string) {
+    const price = parseInt(inter.fields.getTextInputValue('price'))
+    if (!v && Number.isNaN(price))
+      throw new DiscordException(
+        `Couldn't convert \`${inter.fields.getTextInputValue('price')}\` to number`
+      )
     const name = inter.fields.getTextInputValue('name').replace(emojiRegExp, '')
     if (
-      await Item.exists({
+      !v &&
+      (await Item.exists({
         guildId: inter.guildId,
         name: { $regex: `^${name}$`, $options: 'i' }
-      })
+      }))
     )
       throw new DiscordException(`${name} already exists`)
     const emoji = inter.fields.getTextInputValue('name').match(emojiRegExp)?.at(0)
     const description = inter.fields.getTextInputValue('desc')
 
-    await Item.create({
-      guildId: inter.guildId,
-      name,
-      price,
-      description,
-      emoji
-    })
+    const item =
+      (await Item.findById(v)) ??
+      (await Item.create({ guildId: inter.guildId, name, emoji, price, description }))
+    item.name = name || item.name
+    item.emoji = emoji ?? item.emoji
+    item.price = price || item.price
+    item.description = description || item.description
+    await item.save()
 
     const embed = new EmbedBuilder()
       .setTitle('Add Item')
-      .setDescription(`**${name}** has been added for 🪙${price}`)
+      .setDescription(`${item.emoji} **${item.name}** has been added for 🪙${item.price}`)
       .setColor(Colors.Green)
 
-    await inter.reply({
-      embeds: [embed],
-      ephemeral: true
-    })
+    if (!inter.isFromMessage()) {
+      await inter.reply({
+        embeds: [embed],
+        ephemeral: true
+      })
+    } else {
+      await inter.update(await Shop.prototype.response(inter))
+      await inter.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+    }
   }
 }
 
-export class RmItem extends Modal {
+export class UpdItem extends Button {
+  name = 'updItem'
+
+  override async run(inter: ButtonInteraction, v: string) {
+    await ShopMenu.prototype.set(inter, v)
+  }
+}
+
+export class RmItem extends Button {
   name = 'rmItem'
 
-  override async run(inter: ModalSubmitInteraction, v: string) {
+  override async run(inter: ButtonInteraction, v: string) {
     if (!inter.memberPermissions?.has('Administrator'))
       throw new MissingPermissions('Administrator')
 
     const item = await Item.findByIdAndDelete(v)
 
     if (!item) throw new DiscordException(`Item not found: ${v}`)
+    await inter.update(await Shop.prototype.response(inter))
 
     const embed = new EmbedBuilder()
       .setTitle('Add Item')
       .setDescription(`**${item?.name}** has been removed from the shop`)
       .setColor(Colors.Green)
 
-    await inter.reply({
+    await inter.followUp({
       embeds: [embed],
       ephemeral: true
     })

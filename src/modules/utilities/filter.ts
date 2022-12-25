@@ -1,16 +1,23 @@
-import { ChatInputCommand, Listener, SelectMenu } from '../../core'
+import { Button, ChatInputCommand, Listener, SelectMenu } from '../../core'
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
   ChatInputCommandInteraction,
   ClientEvents,
+  Colors,
   EmbedBuilder,
   inlineCode,
   Message,
+  MessageComponentInteraction,
+  MessageType,
   SelectMenuBuilder,
   SelectMenuInteraction,
   SelectMenuOptionBuilder
 } from 'discord.js'
 import Filter from '../../schemata/Filter'
+import { oneLineCommaListsOr } from 'common-tags'
 
 class FilterCommand extends ChatInputCommand {
   name = 'filter'
@@ -28,7 +35,7 @@ class FilterCommand extends ChatInputCommand {
     { id: 'audio', emoji: '🔊' }
   ] as const
 
-  override async run(inter: ChatInputCommandInteraction | SelectMenuInteraction) {
+  override async run(inter: ChatInputCommandInteraction | MessageComponentInteraction) {
     const filter = await Filter.findOneAndUpdate(
       { channelId: inter.channelId },
       {},
@@ -49,21 +56,41 @@ class FilterCommand extends ChatInputCommand {
             .setDefault(filter[m.id] ?? false)
         )
       )
-    const media = new ActionRowBuilder<SelectMenuBuilder>().setComponents(mediaFilter)
+    const levelUpsFilter = new ButtonBuilder()
+      .setCustomId(`levelUpsFilter-${filter.id}`)
+      .setLabel(filter.levelUps ? 'Disable Level-UPs' : 'Enable Level-UPs')
+      .setEmoji('✨')
+      .setStyle(filter.levelUps ? ButtonStyle.Danger : ButtonStyle.Success)
+
+    const components = [
+      new ActionRowBuilder<SelectMenuBuilder>().setComponents(mediaFilter),
+      new ActionRowBuilder<ButtonBuilder>().setComponents(levelUpsFilter)
+    ]
 
     if (inter.isMessageComponent())
       await inter.update({
-        components: [media]
+        components
       })
     else
       await inter.reply({
-        components: [media],
+        components,
         ephemeral: true
       })
   }
 }
 
 export const filterCommand = new FilterCommand()
+
+export class LevelUpsFilter extends Button {
+  name = 'levelUpsFilter'
+
+  override async run(inter: ButtonInteraction, id: string) {
+    const filter = await Filter.findByIdAndUpdate(id, {}, { upsert: true, new: true })
+    filter.levelUps = !filter.levelUps
+    await filter.save()
+    await filterCommand.run(inter)
+  }
+}
 
 export class MediaFilters extends SelectMenu {
   name = 'mediaFilters'
@@ -85,6 +112,7 @@ export class FilterMessages extends Listener {
 
   override async run(msg: Message) {
     if (!msg.deletable) return
+    if (![MessageType.Default, MessageType.Reply].includes(msg.type)) return
     if (!(await Filter.exists({ channelId: msg.channelId }))) return
     await this.checkMedia(msg)
   }
@@ -97,7 +125,7 @@ export class FilterMessages extends Listener {
     if (filter.images)
       if (
         msg.attachments.some((a) => a.contentType?.startsWith('image')) ||
-        msg.embeds.some((e) => e.image ?? e.thumbnail)
+        msg.embeds.some((e) => e.image)
       )
         return
 
@@ -112,14 +140,15 @@ export class FilterMessages extends Listener {
 
     await msg.delete()
 
-    const filters = ['images', 'videos', 'audio'] as const
-    const embed = new EmbedBuilder().setDescription(
-      `Your message didn't match the filters in <#${msg.channelId}>: ${filters
-        .filter((f) => filter[f])
-        .map(inlineCode)
-        .join(', ')}`
-    )
+    const media = filterCommand.media.filter((m) => filter[m.id]).map((m) => inlineCode(m.id))
+    const embed = new EmbedBuilder()
+      .setDescription(
+        oneLineCommaListsOr`Your message in <#${msg.channelId}> has been deleted, because it doesn't contain any ${media}.`
+      )
+      .setColor(Colors.Red)
 
-    await msg.author.send({ embeds: [embed] })
+    await msg.author.send({
+      embeds: [embed]
+    })
   }
 }

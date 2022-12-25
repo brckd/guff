@@ -8,7 +8,11 @@ export const filter = new mongoose.Schema({
   images: Boolean,
   videos: Boolean,
   audio: Boolean,
-  match: String
+  match: String,
+  levelUps: {
+    type: Boolean,
+    default: true
+  }
 })
 
 export default mongoose.model('Filter', filter)

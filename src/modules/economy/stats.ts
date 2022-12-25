@@ -116,7 +116,7 @@ export class Stats extends ChatInputCommand {
         }>('item')
         embed.setDescription(
           invs
-            .filter((i) => i.amount !== 0)
+            .filter((i) => i.item && i.amount !== 0)
             .map((i) => `${i.item.emoji} **${i.item.name}** - ${i.amount}\n${i.item.description}`)
             .join('\n') || "This user doesn't own any items."
         )
