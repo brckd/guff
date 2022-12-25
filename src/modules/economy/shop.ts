@@ -37,7 +37,7 @@ export class Shop extends ChatInputCommand {
   }
 
   async response(inter: Interaction) {
-    const items = await Item.find()
+    const items = await Item.find({ guildId: inter.guildId })
 
     const embed = new EmbedBuilder()
       .setTitle('Shop Items')
