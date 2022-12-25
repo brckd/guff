@@ -3,6 +3,8 @@ import {
   ActionRowBuilder,
   ChatInputCommandInteraction,
   ClientEvents,
+  EmbedBuilder,
+  inlineCode,
   Message,
   SelectMenuBuilder,
   SelectMenuInteraction,
@@ -109,5 +111,15 @@ export class FilterMessages extends Listener {
     if (filter.audio) if (msg.attachments.some((a) => a.contentType?.startsWith('audio'))) return
 
     await msg.delete()
+
+    const filters = ['images', 'videos', 'audio'] as const
+    const embed = new EmbedBuilder().setDescription(
+      `Your message didn't match the filters in <#${msg.channelId}>: ${filters
+        .filter((f) => filter[f])
+        .map(inlineCode)
+        .join(', ')}`
+    )
+
+    await msg.author.send({ embeds: [embed] })
   }
 }
