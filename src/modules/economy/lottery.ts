@@ -43,7 +43,7 @@ export class LotteryCommand extends ChatInputCommand {
     const row = new ActionRowBuilder<ButtonBuilder>().setComponents(submit, startLottery)
 
     await inter.reply({
-      content: '<@&1002177367537635339>',
+      content: '<@&1008402847622242416>',
       embeds: [embed],
       components: [row]
     })
@@ -84,8 +84,9 @@ export class Submission extends Modal {
 
     if (
       await Lottery.exists({
-        value: submission,
-        userId: { $not: { $eq: inter.user.id } }
+        lotteryId,
+        userId: { $not: { $eq: inter.user.id } },
+        value: submission
       })
     )
       throw new DiscordException(`🎫**${submission}** has already been submitted by someone else`)
@@ -150,8 +151,8 @@ export class Start extends Button {
       (v, k) =>
         `${
           value.includes(`${k + 1}`)
-            ? '<a:happythonks:1010218907245744281>'
-            : '<:sadthonk:1021511006024896542>'
+            ? '<:guffo_coin:888125079710474280>'
+            : '<:COOKIE:888125079395921971>'
         }${(k + 1) % 3 === 0 ? '\n' : ''}`
     ).join('')
 
