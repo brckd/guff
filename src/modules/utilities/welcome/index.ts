@@ -49,7 +49,7 @@ export class Welcome extends Listener {
 
   async run(member: GuildMember) {
     if (!member.guild.systemChannel) return
-    const back = await loadImage(resolve(join(__dirname, 'welcome.jpg')))
+    const back = await loadImage(resolve(join(__dirname, '../../../../img/welcome.jpg')))
     const avatar = await loadImage(member.displayAvatarURL())
     const canvas = createImage({ back, avatar, caption: `Welcome ${member.displayName}` })
 
@@ -79,7 +79,7 @@ export class GoodBye extends Listener {
 
   async run(member: GuildMember) {
     if (!member.guild.systemChannel) return
-    const back = await loadImage(resolve(join(__dirname, 'goodbye.jpg')))
+    const back = await loadImage(resolve(join(__dirname, '../../../../img/goodbye.jpg')))
     const avatar = await loadImage(member.displayAvatarURL())
     const canvas = createImage({ back, avatar, caption: `Goodbye, ${member.nickname}` })
 
