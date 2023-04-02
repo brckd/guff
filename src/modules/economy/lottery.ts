@@ -192,8 +192,21 @@ export class Start extends Button {
 export class Schedule extends Listener {
   name = 'scheduleLottery'
   event: keyof ClientEvents = 'ready'
+  override once = true
 
   override async run(client: Client) {
+    const schedules = this.schedule(client)
+    let current = schedules.next()
+    while (true) {
+      await current
+      current = schedules.next()
+    }
+  }
+
+  async *schedule(client: Client) {
+    const channel = await client.channels.fetch('968171160279871548')
+    if (!(channel instanceof TextChannel)) return
+
     const now = new Date()
     const goal = new Date()
     goal.setDate(now.getDate() + 7 - now.getDay()) // sunday
@@ -201,8 +214,7 @@ export class Schedule extends Listener {
     if (goal.getMilliseconds() > now.getMilliseconds()) goal.setDate(goal.getDate() + 7) // next time ¯\_(ツ)_/¯
 
     await sleep(goal.getMilliseconds() - now.getMilliseconds())
-    const channel = await client.channels.fetch('968171160279871548')
-    if (channel instanceof TextChannel) await lotteryCommand.run(channel)
+    yield lotteryCommand.run(channel)
   }
 }
 
