@@ -25,7 +25,8 @@ export async function levelUp(inter: Message, before: number, after: number) {
   const fetched = channelId ? await inter.client.channels.fetch(channelId) : null
   if (channelId) await inter.client.channels.fetch(channelId)
   const channel = fetched instanceof TextChannel ? fetched : inter.channel
-
+  if (!(channel instanceof TextChannel)) return
+  if (!channel.permissionsFor(inter.client.user)?.has('SendMessages')) return
   await channel.send({
     embeds: [embed]
   })
