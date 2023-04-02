@@ -1,4 +1,11 @@
-import { Button, ChatInputCommand, DiscordException, MissingPermissions, Modal } from '../../core'
+import {
+  Button,
+  ChatInputCommand,
+  DiscordException,
+  Listener,
+  MissingPermissions,
+  Modal
+} from '../../core'
 import {
   ChatInputCommandInteraction,
   ActionRowBuilder,
@@ -10,12 +17,15 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ModalSubmitInteraction,
-  Colors
+  Colors,
+  ClientEvents,
+  Client,
+  TextChannel
 } from 'discord.js'
 import Lottery from '../../schemata/Lottery'
 import Wallet from '../../schemata/Wallet'
 
-export class LotteryCommand extends ChatInputCommand {
+class LotteryCommand extends ChatInputCommand {
   name = 'lottery'
   description = 'Start a new Lottery'
 
@@ -24,7 +34,7 @@ export class LotteryCommand extends ChatInputCommand {
     this.defaultMemberPermissions = ['Administrator']
   }
 
-  override async run(inter: ChatInputCommandInteraction) {
+  override async run(inter: ChatInputCommandInteraction | TextChannel) {
     const embed = new EmbedBuilder()
       .setTitle('New Lottery')
       .setDescription(
@@ -42,13 +52,21 @@ export class LotteryCommand extends ChatInputCommand {
       .setStyle(ButtonStyle.Secondary)
     const row = new ActionRowBuilder<ButtonBuilder>().setComponents(submit, startLottery)
 
-    await inter.reply({
-      content: '<@&1008402847622242416>',
-      embeds: [embed],
-      components: [row]
-    })
+    if (inter instanceof TextChannel)
+      await inter.send({
+        content: '<@&1008402847622242416>',
+        embeds: [embed],
+        components: [row]
+      })
+    else
+      await inter.reply({
+        content: '<@&1008402847622242416>',
+        embeds: [embed],
+        components: [row]
+      })
   }
 }
+export const lotteryCommand = new LotteryCommand()
 
 export class Submit extends Button {
   name = 'lotterySubmit'
@@ -169,4 +187,25 @@ export class Start extends Button {
 
     await Lottery.deleteMany({ lotteryId })
   }
+}
+
+export class Schedule extends Listener {
+  name = 'scheduleLottery'
+  event: keyof ClientEvents = 'ready'
+
+  override async run(client: Client) {
+    const now = new Date()
+    const goal = new Date()
+    goal.setDate(now.getDate() + 7 - now.getDay()) // sunday
+    goal.setHours(12, 0, 0, 0) // 12:00
+    if (goal.getMilliseconds() > now.getMilliseconds()) goal.setDate(goal.getDate() + 7) // next time ¯\_(ツ)_/¯
+
+    await sleep(goal.getMilliseconds() - now.getMilliseconds())
+    const channel = await client.channels.fetch('968171160279871548')
+    if (channel instanceof TextChannel) await lotteryCommand.run(channel)
+  }
+}
+
+export async function sleep(ms = 0) {
+  return await new Promise((resolve) => setTimeout(() => resolve, ms))
 }
