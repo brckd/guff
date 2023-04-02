@@ -1,5 +1,5 @@
 import { Listener } from '../../core'
-import { ClientEvents, EmbedBuilder, Message, TextChannel } from 'discord.js'
+import { ClientEvents, EmbedBuilder, Message, TextChannel, channelMention } from 'discord.js'
 import Xp from '../../schemata/Xp'
 import Guild from '../../schemata/Guild'
 import Filter from '../../schemata/Filter'
@@ -26,7 +26,17 @@ export async function levelUp(inter: Message, before: number, after: number) {
   if (channelId) await inter.client.channels.fetch(channelId)
   const channel = fetched instanceof TextChannel ? fetched : inter.channel
   if (!(channel instanceof TextChannel)) return
-  if (!channel.permissionsFor(inter.client.user)?.has('SendMessages')) return
+  if (!channel.permissionsFor(inter.client.user)?.has('SendMessages')) {
+    const owner = await inter.guild?.fetchOwner()
+    const embed = new EmbedBuilder()
+      .setTitle('Missing Permissions')
+      .setDescription(
+        `I don't have permissions to send Level-Ups to ${channelMention(channel.id)}.
+Consider using </set channel:0>`
+      )
+      .setColor('Red')
+    return await owner?.send({ embeds: [embed] })
+  }
   await channel.send({
     embeds: [embed]
   })
