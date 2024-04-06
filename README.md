@@ -8,3 +8,7 @@
 [![license](https://img.shields.io/github/license/hmues/pieces?logo=github)](https://github.com/brycked/guff/blob/main/LICENSE.md)
 
 </div>
+
+> [!Warning]
+> This project has been archived, as the sheer amount of requested features cost me too much time.
+> Lesson learned: Don't promise big projects without expecting a long-term compensation.
